@@ -1,0 +1,82 @@
+<div class="wrapper-filter">
+  <mat-form-field appearance="outline" floatLabel="always" class="input-filter w-30">
+    <mat-label>Filter</mat-label>
+    <input matInput [formControl]="globalFilterControl" />
+  </mat-form-field>
+
+  <div>
+    <button
+      mat-icon-button
+      [matMenuTriggerFor]="colMenu"
+      matTooltip="Select all or only the columns you wish to filter."
+      [matTooltipPosition]="'right'">
+      <mat-icon>more_vert</mat-icon>
+    </button>
+
+    <mat-menu #colMenu="matMenu">
+      <section class="wrapper-section">
+        <div>
+          <mat-checkbox
+            (click)="$event.stopPropagation()"
+            [checked]="allSelected"
+            [indeterminate]="someSelected()"
+            (change)="selectAll($event.checked); getSelectedColumns()">
+            {{ selectAllColumns }}
+          </mat-checkbox>
+        </div>
+
+        <div
+          (click)="$event.stopPropagation()"
+          mat-menu-item
+          *ngFor="let column of displayedColumns">
+          <mat-checkbox
+            [(ngModel)]="column.select"
+            (ngModelChange)="updateAllSelected(); getSelectedColumns()">
+            {{ column.nameCol }}
+          </mat-checkbox>
+        </div>
+      </section>
+    </mat-menu>
+  </div>
+</div>
+
+<div class="container mat-elevation-z1">
+  <table mat-table [dataSource]="dataSource">
+    <ng-container *ngFor="let column of displayedColumns" [matColumnDef]="column.nameCol">
+      <th mat-header-cell *matHeaderCellDef>
+        {{ column.nameCol | titlecase }}
+
+        <ng-container *ngIf="column.nameCol === ColumnsEnum.NAME">
+          <div class="input-filter">
+            <mat-form-field appearance="outline" floatLabel="always">
+              <input
+                matInput
+                class="form-field"
+                [formControl]="nameFilterControl"
+                placeholder="Filter by {{ column.nameCol }}" />
+            </mat-form-field>
+          </div>
+        </ng-container>
+
+        <ng-container *ngIf="column.nameCol === ColumnsEnum.PROGRESS">
+          <div class="input-filter">
+            <mat-form-field appearance="outline" floatLabel="always">
+              <input
+                matInput
+                class="form-field"
+                [formControl]="progressFilterControl"
+                placeholder="Filter by {{ column.nameCol }}" />
+            </mat-form-field>
+          </div>
+        </ng-container>
+      </th>
+
+      <td mat-cell *matCellDef="let element">{{ getColumnValue(element, column.nameCol) }}</td>
+    </ng-container>
+
+    <tr mat-header-row *matHeaderRowDef="getHeaderColumns(); sticky: true"></tr>
+    <tr mat-row *matRowDef="let row; columns: getHeaderColumns()"></tr>
+  </table>
+
+  <mat-paginator [pageSizeOptions]="[5, 10, 25, 100]" showFirstLastButtons></mat-paginator>
+</div>
